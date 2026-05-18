@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KROS — Knowledge Retention & Operations System</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:      #0A0B0D;
+  --paper:    #F5F2EC;
+  --cream:    #EDE9E0;
+  --gold:     #B8922A;
+  --gold2:    #E8B84B;
+  --rust:     #C04A2A;
+  --slate:    #2D3748;
+  --muted:    #6B7280;
+  --ops:      #C04A2A;
+  --comp:     #2D6A4F;
+  --fin:      #1A4A8A;
+  --hrm:      #6B2D8A;
+  --cont:     #8A4A1A;
+  --border:   #D4CFC4;
+  --serif:    'Instrument Serif', Georgia, serif;
+  --sans:     'Syne', sans-serif;
+  --mono:     'DM Mono', monospace;
+}
+
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page-break { page-break-before: always; }
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+/* ── COVER PAGE ──────────────────────────────────────────────── */
+.cover {
+  min-height: 100vh;
+  background: var(--ink);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  position: relative;
+  overflow: hidden;
+  padding: 60px;
+}
+
+.cover-bg {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 79px,
+      rgba(184,146,42,0.06) 79px,
+      rgba(184,146,42,0.06) 80px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 79px,
+      rgba(184,146,42,0.06) 79px,
+      rgba(184,146,42,0.06) 80px
+    );
+}
+
+.cover-accent {
+  position: absolute;
+  top: 0; right: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent 0%, rgba(184,146,42,0.08) 100%);
+  border-left: 1px solid rgba(184,146,42,0.15);
+}
+
+.cover-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 700px;
+}
+
+.cover-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cover-label::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.cover-title {
+  font-family: var(--serif);
+  font-size: clamp(52px, 8vw, 88px);
+  line-height: 1.0;
+  color: var(--paper);
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+}
+
+.cover-title span {
+  color: var(--gold2);
+  font-style: italic;
+}
+
+.cover-subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(245,242,236,0.65);
+  margin-bottom: 48px;
+  max-width: 480px;
+  line-height: 1.7;
+}
+
+.cover-stats {
+  display: flex;
+  gap: 48px;
+  margin-bottom: 60px;
+}
+
+.stat {
+  border-left: 2px solid var(--gold);
+  padding-left: 16px;
+}
+
+.stat-number {
+  font-family: var(--serif);
+  font-size: 36px;
+  color: var(--gold2);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(245,242,236,0.45);
+}
+
+.cover-engines {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.engine-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid rgba(184,146,42,0.3);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(245,242,236,0.7);
+  letter-spacing: 0.5px;
+}
+
+.engine-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+}
+.dot-claude   { background: #C084FC; }
+.dot-deepseek { background: #F59E0B; }
+.dot-pg       { background: #3B82F6; }
+
+.cover-footer {
+  position: relative;
+  border-top: 1px solid rgba(184,146,42,0.2);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(245,242,236,0.3);
+  letter-spacing: 1px;
+}
+
+/* ── SECTION LAYOUT ──────────────────────────────────────────── */
+.section {
+  padding: 80px 60px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  max-width: 120px;
+}
+
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 1.1;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+
+.section-title em { font-style: italic; color: var(--gold); }
+
+.section-body {
+  font-size: 15px;
+  color: var(--slate);
+  max-width: 680px;
+  line-height: 1.8;
+  margin-bottom: 48px;
+}
+
+/* ── ARCHITECTURE ────────────────────────────────────────────── */
+.arch-bg {
+  background: var(--ink);
+  padding: 80px 60px;
+}
+
+.arch-flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 48px auto;
+  max-width: 900px;
+  position: relative;
+}
+
+.arch-flow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold) 0%, rgba(184,146,42,0.3) 100%);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.arch-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.arch-icon {
+  width: 64px; height: 64px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  border: 1px solid rgba(184,146,42,0.3);
+}
+
+.arch-icon.user    { background: rgba(184,146,42,0.1); }
+.arch-icon.claude  { background: rgba(192,132,252,0.15); border-color: rgba(192,132,252,0.3); }
+.arch-icon.ds      { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); }
+.arch-icon.pg      { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.3); }
+
+.arch-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(245,242,236,0.9);
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.arch-desc {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(245,242,236,0.35);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── PROJECT CARDS ───────────────────────────────────────────── */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin: 48px 0;
+}
+
+.project-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px 20px;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.project-card.ops::before    { background: var(--ops); }
+.project-card.comp::before   { background: var(--comp); }
+.project-card.fin::before    { background: var(--fin); }
+.project-card.hrm::before    { background: var(--hrm); }
+.project-card.cont::before   { background: var(--cont); }
+
+.project-icon { font-size: 28px; margin-bottom: 12px; }
+
+.project-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.project-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  line-height: 1.7;
+}
+
+/* ── SKILLS TABLE ────────────────────────────────────────────── */
+.skills-section {
+  background: var(--cream);
+  padding: 80px 60px;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 48px;
+}
+
+.skill-group {}
+
+.skill-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid;
+  margin-bottom: 20px;
+}
+
+.skill-group-header.ops    { border-color: var(--ops); }
+.skill-group-header.comp   { border-color: var(--comp); }
+.skill-group-header.fin    { border-color: var(--fin); }
+.skill-group-header.hrm    { border-color: var(--hrm); }
+.skill-group-header.cont   { border-color: var(--cont); }
+.skill-group-header.intel  { border-color: var(--gold); }
+.skill-group-header.gov    { border-color: var(--slate); }
+
+.skill-group-icon { font-size: 20px; }
+
+.skill-group-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.skill-group-count {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.skill-row {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  align-items: flex-start;
+}
+
+.skill-row:last-child { border-bottom: none; }
+
+.skill-file {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 1px;
+  min-width: 170px;
+}
+
+.skill-desc {
+  font-size: 11.5px;
+  color: var(--slate);
+  line-height: 1.5;
+}
+
+/* ── FEATURES ────────────────────────────────────────────────── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.feature-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px;
+}
+
+.feature-num {
+  font-family: var(--serif);
+  font-size: 36px;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.feature-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.feature-body {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── COST TABLE ──────────────────────────────────────────────── */
+.cost-section {
+  background: var(--ink);
+  padding: 80px 60px;
+}
+
+.cost-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 48px;
+  max-width: 800px;
+}
+
+.cost-table th {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(184,146,42,0.3);
+  text-align: left;
+}
+
+.cost-table td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: rgba(245,242,236,0.8);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-family: var(--mono);
+}
+
+.cost-table .highlight { color: var(--gold2); font-weight: 500; }
+.cost-table .saving { color: #4ADE80; }
+.cost-table .label { color: rgba(245,242,236,0.5); font-size: 11px; }
+
+/* ── HOW IT WORKS ────────────────────────────────────────────── */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  margin-top: 48px;
+  position: relative;
+}
+
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: var(--border);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.step-num {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-style: italic;
+  background: white;
+  border: 2px solid var(--border);
+  color: var(--gold);
+}
+
+.step-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.step-body {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── COMPLIANCE MATRIX ───────────────────────────────────────── */
+.matrix {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.matrix-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+}
+
+.matrix-authority {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.matrix-name {
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-family: var(--mono);
+}
+
+.matrix-items {
+  list-style: none;
+}
+
+.matrix-items li {
+  font-size: 11px;
+  color: var(--slate);
+  padding: 3px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.5;
+}
+
+.matrix-items li::before {
+  content: '→';
+  color: var(--gold);
+  font-size: 10px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+/* ── BACK COVER ──────────────────────────────────────────────── */
+.back-cover {
+  background: var(--ink);
+  padding: 80px 60px;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.back-cover::before {
+  content: 'KROS';
+  position: absolute;
+  font-family: var(--serif);
+  font-size: 300px;
+  color: rgba(184,146,42,0.04);
+  pointer-events: none;
+  letter-spacing: -10px;
+  line-height: 1;
+}
+
+.back-quote {
+  font-family: var(--serif);
+  font-size: clamp(20px, 3vw, 28px);
+  font-style: italic;
+  color: var(--paper);
+  max-width: 600px;
+  line-height: 1.5;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.back-quote::before {
+  content: '"';
+  font-size: 80px;
+  color: var(--gold);
+  line-height: 0;
+  position: absolute;
+  top: 40px;
+  left: -40px;
+  opacity: 0.5;
+}
+
+.back-attr {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(245,242,236,0.35);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 60px;
+}
+
+.back-tagline {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--gold2);
+  letter-spacing: 2px;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0 60px;
+}
+
+.dark-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin: 0 60px;
+}
+
+/* ── REGULATORY LANDSCAPE ────────────────────────────────────── */
+.reg-bands {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 48px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.reg-band {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  border-bottom: 1px solid var(--border);
+}
+
+.reg-band:last-child { border-bottom: none; }
+
+.reg-authority {
+  padding: 16px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--cream);
+  border-right: 1px solid var(--border);
+}
+
+.reg-authority-name { color: var(--ink); }
+.reg-authority-full { font-size: 9px; color: var(--muted); font-weight: 400; font-family: var(--mono); }
+
+.reg-items {
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.reg-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.05);
+  color: var(--slate);
+  border: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  COVER                                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-bg"></div>
+  <div class="cover-accent"></div>
+
+  <div class="cover-content">
+    <div class="cover-label">Product Overview 2026 · Confidential</div>
+
+    <h1 class="cover-title">KROS<br><span>Knowledge</span><br>Retained.</h1>
+
+    <p class="cover-subtitle">
+      The AI-powered knowledge system built for Malaysian mining operations.
+      53 expert Skills.md modules. Five department Projects. One system that
+      never forgets what your best people know.
+    </p>
+
+    <div class="cover-stats">
+      <div class="stat">
+        <div class="stat-number">53</div>
+        <div class="stat-label">Skills Modules</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">5</div>
+        <div class="stat-label">AI Projects</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">85%</div>
+        <div class="stat-label">Cost Saving vs Claude Opus</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Always Available</div>
+      </div>
+    </div>
+
+    <div class="cover-engines">
+      <div class="engine-pill"><div class="engine-dot dot-claude"></div>Claude — Interface & Safety</div>
+      <div class="engine-pill"><div class="engine-dot dot-deepseek"></div>DeepSeek — Reasoning Engine</div>
+      <div class="engine-pill"><div class="engine-dot dot-pg"></div>pgvector — Skills Retrieval</div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <span>KROS v1.0 · Vanguard Mining Berhad</span>
+    <span>Claude Sonnet 4 · DeepSeek V3/R1 · PostgreSQL 16 · pgvector</span>
+    <span>Confidential — Not for Distribution</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  THE PROBLEM                                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">The Challenge</div>
+  <h2 class="section-title">Mining operations run on<br><em>knowledge that walks out the door.</em></h2>
+  <p class="section-body">
+    When your Mine Manager retires, your senior Environmental Officer resigns, or your Shot Firer moves on — decades
+    of site-specific expertise, regulatory relationships, and operational workarounds leave with them.
+    New hires repeat costly mistakes. Compliance gaps emerge silently.
+    Regulatory submissions are missed. Production suffers.
+    <br><br>
+    KROS captures that knowledge in structured Skills.md modules — and makes it instantly accessible
+    to every team member, at any hour, in plain language.
+  </p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-num">01</div>
+      <div class="feature-title">Knowledge Retention</div>
+      <div class="feature-body">Structured exit interviews capture 30 years of expertise before staff leave. Skills.md modules preserve site-specific, regulatory, and operational knowledge permanently.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">02</div>
+      <div class="feature-title">Regulatory Compliance</div>
+      <div class="feature-body">53 modules cover DOE, DOSH, JMG, Mines Dept, Immigration, and LHDN obligations — with specific Act sections, deadlines, form numbers, and submission workflows.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">03</div>
+      <div class="feature-title">Instant Expert Access</div>
+      <div class="feature-body">Ask KROS anything in plain English or Bahasa Malaysia. Get procedure steps, royalty calculations, blast designs, or HR precedents — in seconds, not days.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">04</div>
+      <div class="feature-title">Cost Intelligence</div>
+      <div class="feature-body">DeepSeek V3 reasoning costs 85% less than Claude Opus. At 150 queries/day, KROS costs USD 55–80/month vs USD 850/month for an all-Claude system.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">05</div>
+      <div class="feature-title">Emergency Response</div>
+      <div class="feature-body">Emergency queries bypass DeepSeek and receive instant Claude response. Misfires, slope collapses, chemical spills — step-by-step guidance in under 3 seconds.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">06</div>
+      <div class="feature-title">Malaysia-Specific</div>
+      <div class="feature-body">Built from the ground up for Malaysian mining. Correct EPF/SOCSO rates, state royalty schedules, PLKS procedures, JMG forms, DOE Standard A/B limits, and CIDB compliance.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  ARCHITECTURE                                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="arch-bg">
+  <div style="max-width:1100px;margin:0 auto;padding:0 0;">
+    <div class="section-label" style="color:rgba(184,146,42,0.8);">System Architecture</div>
+    <h2 class="section-title" style="color:var(--paper);">Two AI engines.<br><em>One intelligent interface.</em></h2>
+    <p style="color:rgba(245,242,236,0.55);font-size:15px;max-width:600px;line-height:1.8;margin-bottom:0;">
+      Claude handles everything the user sees. DeepSeek handles everything that requires heavy reasoning.
+      The split reduces cost by 85% while maintaining the quality and safety of a Claude-native experience.
+    </p>
+
+    <div class="arch-flow">
+      <div class="arch-node">
+        <div class="arch-icon user">👤</div>
+        <div class="arch-name">User</div>
+        <div class="arch-desc">Browser or mobile<br>English or BM<br>Any department</div>
+      </div>
+      <div class="arch-node">
+        <div class="arch-icon claude">◆</div>
+        <div class="arch-name">Claude Sonnet</div>
+        <div class="arch-desc">Interface & safety<br>5 Project prompts<br>Emergency path</div>
+      </div>
+      <div class="arch-node">
+        <div class="arch-icon ds">⚡</div>
+        <div class="arch-name">DeepSeek V3/R1</div>
+        <div class="arch-desc">Skills reasoning<br>Calculations<br>Document drafting</div>
+      </div>
+      <div class="arch-node">
+        <div class="arch-icon pg">🗄</div>
+        <div class="arch-name">pgvector</div>
+        <div class="arch-desc">53 Skills.md<br>Semantic search<br>Top-5 retrieval</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:12px;max-width:900px;margin-left:auto;margin-right:auto;">
+      <div style="padding:20px;border:1px solid rgba(184,146,42,0.2);border-radius:6px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;">TRIAGE (Haiku)</div>
+        <div style="font-size:12px;color:rgba(245,242,236,0.6);line-height:1.7;">Every query classified in &lt;1 second: emergency / project / useDeepSeek / sensitiveData</div>
+      </div>
+      <div style="padding:20px;border:1px solid rgba(192,132,252,0.2);border-radius:6px;">
+        <div style="font-family:var(--mono);font-size:10px;color:#C084FC;letter-spacing:2px;margin-bottom:8px;">EMERGENCY PATH</div>
+        <div style="font-size:12px;color:rgba(245,242,236,0.6);line-height:1.7;">Misfires, injuries, slope collapse — Claude responds directly in &lt;3 seconds. No DeepSeek delay.</div>
+      </div>
+      <div style="padding:20px;border:1px solid rgba(59,130,246,0.2);border-radius:6px;">
+        <div style="font-family:var(--mono);font-size:10px;color:#60A5FA;letter-spacing:2px;margin-bottom:8px;">STANDARD PATH</div>
+        <div style="font-size:12px;color:rgba(245,242,236,0.6);line-height:1.7;">Retrieve → DeepSeek reasons → Claude formats. Full pipeline in 1.5–4 seconds average.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  FIVE PROJECTS                                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Department Projects</div>
+  <h2 class="section-title">Five AI Projects,<br><em>one for each department.</em></h2>
+  <p class="section-body">
+    Each KROS Project is a fully configured AI department with its own system prompt, vocabulary, safety rules,
+    and knowledge context. Staff access the Project relevant to their role and get expert-level answers
+    without knowing which Skills.md module is being used behind the scenes.
+  </p>
+
+  <div class="projects-grid">
+    <div class="project-card ops">
+      <div class="project-icon">⛏️</div>
+      <div class="project-name">Operations</div>
+      <div class="project-sub">Blast · Drilling · Survey · Plant · Equipment · Geotechnical · Haul Road</div>
+    </div>
+    <div class="project-card comp">
+      <div class="project-icon">🛡️</div>
+      <div class="project-name">Compliance & EHS</div>
+      <div class="project-sub">DOE · DOSH · JMG · Mines Act · EIA · Community · Emergency</div>
+    </div>
+    <div class="project-card fin">
+      <div class="project-icon">💰</div>
+      <div class="project-name">Finance</div>
+      <div class="project-sub">Royalty · Export Duty · Cost Control · Budget · Billing · Insurance</div>
+    </div>
+    <div class="project-card hrm">
+      <div class="project-icon">👥</div>
+      <div class="project-name">HR & Competency</div>
+      <div class="project-sub">Certs · OT · Roster · Payroll · Disciplinary · Training · Exit</div>
+    </div>
+    <div class="project-card cont">
+      <div class="project-icon">📄</div>
+      <div class="project-name">Contracts</div>
+      <div class="project-sub">KPI · Variation Orders · Procurement · Offtake · Subcontractors</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  53 SKILLS INDEX                                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="skills-section">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="section-label">Knowledge Library</div>
+    <h2 class="section-title">53 Skills.md Modules<br><em>built for Malaysian mining.</em></h2>
+    <p class="section-body">
+      Every Skills.md module is a structured expert document containing rules, procedures, regulatory references,
+      calculation formulae, worked examples, and Malaysia-specific context. Modules load automatically
+      based on semantic relevance to the user's query.
+    </p>
+
+    <div class="skills-grid">
+
+      <!-- OPERATIONS -->
+      <div class="skill-group">
+        <div class="skill-group-header ops">
+          <div class="skill-group-icon">⛏️</div>
+          <div class="skill-group-title">Operations</div>
+          <div class="skill-group-count">11 modules</div>
+        </div>
+        <div class="skill-row"><div class="skill-file">blast_operations</div><div class="skill-desc">Blast design, stemming tables, misfire protocol, JMG notification, JKPK compliance</div></div>
+        <div class="skill-row"><div class="skill-file">drilling_procedures</div><div class="skill-desc">DTH/rotary pattern design, OEM parameters, hole logging, penetration benchmarks</div></div>
+        <div class="skill-row"><div class="skill-file">geotechnical_mgmt</div><div class="skill-desc">TARP Green/Yellow/Orange/Red, crack survey, piezometer, slope design, blast vibration</div></div>
+        <div class="skill-row"><div class="skill-file">haul_road_mgmt</div><div class="skill-desc">Road width standards, gradient limits, berm design, compaction specs, maintenance schedule</div></div>
+        <div class="skill-row"><div class="skill-file">equipment_maintenance</div><div class="skill-desc">PM schedules by equipment class, breakdown P1/P2/P3 response, oil sampling, DOSH certs</div></div>
+        <div class="skill-row"><div class="skill-file">ore_processing</div><div class="skill-desc">Crushing circuits, grade control sampling, moisture management, stockpile reconciliation</div></div>
+        <div class="skill-row"><div class="skill-file">water_management</div><div class="skill-desc">Sump sizing, settling pond management, TSS treatment, dewatering pump failure protocol</div></div>
+        <div class="skill-row"><div class="skill-file">survey_procedures</div><div class="skill-desc">Monthly production survey, GDM2000 datum, drone survey, boundary peg inspection</div></div>
+        <div class="skill-row"><div class="skill-file">mine_planning</div><div class="skill-desc">Annual mine plan, bench design, JORC reserve estimation, pit optimisation, scheduling</div></div>
+        <div class="skill-row"><div class="skill-file">dust_management</div><div class="skill-desc">Water cart schedules, chemical suppressants, PM10 monitoring, silica OEL, USECHH</div></div>
+        <div class="skill-row"><div class="skill-file">energy_management</div><div class="skill-desc">Fuel benchmarks, FMS reconciliation, theft prevention, generator L/kWh, TNB tariffs</div></div>
+      </div>
+
+      <!-- COMPLIANCE -->
+      <div class="skill-group">
+        <div class="skill-group-header comp">
+          <div class="skill-group-icon">🛡️</div>
+          <div class="skill-group-title">Compliance & EHS</div>
+          <div class="skill-group-count">12 modules</div>
+        </div>
+        <div class="skill-row"><div class="skill-file">licence_registry</div><div class="skill-desc">ML, TOL, quarry, explosive, DOSH, DOE licences — expiry tracking, renewal workflows</div></div>
+        <div class="skill-row"><div class="skill-file">jmg_technical</div><div class="skill-desc">Annual mine plan submission, ATR, topographic survey standards, reserve statement</div></div>
+        <div class="skill-row"><div class="skill-file">doe_approvals</div><div class="skill-desc">EIA conditions, Standard A/B effluent limits, scheduled waste, self-reporting obligations</div></div>
+        <div class="skill-row"><div class="skill-file">eia_conditions</div><div class="skill-desc">Condition-by-condition tracker, monthly compliance checklist, DOE inspection prep</div></div>
+        <div class="skill-row"><div class="skill-file">dosh_safety</div><div class="skill-desc">OSHA 1994, JKKP 8 reporting, HIRARC 5×5 matrix, toolbox talk records, inspection readiness</div></div>
+        <div class="skill-row"><div class="skill-file">emergency_response</div><div class="skill-desc">6 emergency scenarios: slope collapse, misfire, vehicle accident, fire, spill, medical</div></div>
+        <div class="skill-row"><div class="skill-file">noise_vibration</div><div class="skill-desc">PPV limits, scaled distance formula, blast log, community complaint response protocol</div></div>
+        <div class="skill-row"><div class="skill-file">env_monitoring</div><div class="skill-desc">Monthly DOE monitoring: water quality, PM10, noise, scheduled waste inventory</div></div>
+        <div class="skill-row"><div class="skill-file">mine_rehabilitation</div><div class="skill-desc">Progressive rehab, species selection, rehabilitation bond, final void, closure plan</div></div>
+        <div class="skill-row"><div class="skill-file">community_relations</div><div class="skill-desc">FPIC 7-step, Orang Asal, grievance register, benefit-sharing, social licence monitoring</div></div>
+        <div class="skill-row"><div class="skill-file">chemical_waste_mgmt</div><div class="skill-desc">SW codes, storage design, Form SW6/SW7, consignment notes, spill response, USECHH</div></div>
+        <div class="skill-row"><div class="skill-file">site_access</div><div class="skill-desc">TOL application, land access agreement, illegal mining detection, reinstatement obligations</div></div>
+      </div>
+
+      <!-- MINERAL INTELLIGENCE -->
+      <div class="skill-group">
+        <div class="skill-group-header intel">
+          <div class="skill-group-icon">🌏</div>
+          <div class="skill-group-title">Mineral Intelligence</div>
+          <div class="skill-group-count">2 modules</div>
+        </div>
+        <div class="skill-row"><div class="skill-file">malaysia_mineral_intelligence</div><div class="skill-desc">National production by state/mineral, JMG data, USGS rankings, NIMP 2030 priorities, global rankings</div></div>
+        <div class="skill-row"><div class="skill-file">mineral_benchmark</div><div class="skill-desc">Company vs national benchmark: scale position, cost competitiveness, royalty verification, export risk flags</div></div>
+      </div>
+
+      <!-- FINANCE -->
+      <div class="skill-group">
+        <div class="skill-group-header fin">
+          <div class="skill-group-icon">💰</div>
+          <div class="skill-group-title">Finance</div>
+          <div class="skill-group-count">8 modules</div>
+        </div>
+        <div class="skill-row"><div class="skill-file">fin_royalties</div><div class="skill-desc">State royalty rates by mineral and state, ORP formula, Form MR-2, monthly submission workflow</div></div>
+        <div class="skill-row"><div class="skill-file">fin_export_duty</div><div class="skill-desc">Duty rates by grade (iron ore 10–25%), K3 Customs form, HS codes, worked calculation examples</div></div>
+        <div class="skill-row"><div class="skill-file">fin_cost_control</div><div class="skill-desc">RM/tonne benchmarks by category, monthly variance report, contractor invoice verification</div></div>
+        <div class="skill-row"><div class="skill-file">fin_budget_planning</div><div class="skill-desc">Annual budget build-up from mine plan, revenue model, opex/capex, sensitivity analysis</div></div>
+        <div class="skill-row"><div class="skill-file">fin_contractor_billing</div><div class="skill-desc">Progress claim certification, retention money register, LAD deduction, CIPAA 2012</div></div>
+        <div class="skill-row"><div class="skill-file">fin_govt_contracts</div><div class="skill-desc">JKR/CIDB billing, Sijil Mula Kerja, CIDB levy, government progress claim format, payment recovery</div></div>
+        <div class="skill-row"><div class="skill-file">insurance_mgmt</div><div class="skill-desc">CAR, PL, Machinery Breakdown, Environmental Liability, FWCS portfolio management</div></div>
+        <div class="skill-row"><div class="skill-file">energy_management</div><div class="skill-desc">Diesel cost/tonne, FMS reconciliation, generator efficiency, TNB tariff optimisation</div></div>
+      </div>
+
+      <!-- HRM -->
+      <div class="skill-group">
+        <div class="skill-group-header hrm">
+          <div class="skill-group-icon">👥</div>
+          <div class="skill-group-title">HR & Competency</div>
+          <div class="skill-group-count">12 modules</div>
+        </div>
+        <div class="skill-row"><div class="skill-file">hrm_competency</div><div class="skill-desc">Mine Manager CoC, Shot Firer Licence, SHO — mandatory cert matrix, expiry tracking</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_succession</div><div class="skill-desc">Tier 1/2/3 risk, deputy mapping, quarterly review, Mines Act s.15 acting appointment</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_exit</div><div class="skill-desc">30-question structured exit interview across 7 modules: ops, regulatory, vendors, systems, pending work</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_overtime</div><div class="skill-desc">EA 1955 OT rates (1.5×/2.0×/3.0×), ORP ÷ 26 formula, 104-hour monthly cap, shift worker OT</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_duty_roster</div><div class="skill-desc">Fixed schedule, 3-shift (8hr), 2-shift (12hr 4-on-2-off), security roster, on-call templates</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_payroll</div><div class="skill-desc">EPF (11%/13%), SOCSO (0.5%/1.75%), EIS, PCB via ez-Hasil, pro-rata, complete payslip example</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_leave_management</div><div class="skill-desc">Annual leave 8/12/16 days, sick leave, maternity 98 days (2022 amendment), encashment formula</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_disciplinary</div><div class="skill-desc">Natural justice, show cause, domestic inquiry procedure, AWOL, Industrial Court risk</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_performance</div><div class="skill-desc">KPI framework by dept, 5-point rating, PIP, increment matrix, bonus calculation formula</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_training</div><div class="skill-desc">HRD Corp levy (1%), SBL-Khas claim process, mandatory training calendar, CIDB Green Card</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_foreign_workers</div><div class="skill-desc">PLKS via e-Permit, FOMEMA, RM 410/month levy, repatriation bond, absconding protocol</div></div>
+        <div class="skill-row"><div class="skill-file">hrm_termination_benefits</div><div class="skill-desc">EA 1980 rates 10/15/20 days, full retrenchment package, VSS design, EIS claim (60 days)</div></div>
+      </div>
+
+      <!-- CONTRACTS -->
+      <div class="skill-group">
+        <div class="skill-group-header cont">
+          <div class="skill-group-icon">📄</div>
+          <div class="skill-group-title">Contracts</div>
+          <div class="skill-group-count">7 modules</div>
+        </div>
+        <div class="skill-row"><div class="skill-file">contract_mgmt</div><div class="skill-desc">Pre-qualification checklist, tender evaluation, LOA key clauses, VO process, contract closure</div></div>
+        <div class="skill-row"><div class="skill-file">contractor_performance</div><div class="skill-desc">6-element KPI scorecard, monthly scoring, warning letters, show cause, renewal matrix</div></div>
+        <div class="skill-row"><div class="skill-file">procurement</div><div class="skill-desc">PR-to-PO workflow, 3-quote requirement, AVL management, split PO prevention, petty cash</div></div>
+        <div class="skill-row"><div class="skill-file">subcontractor_mgmt</div><div class="skill-desc">CIDB Green Card, site induction, PTW system, daily labour deployment, principal liability</div></div>
+        <div class="skill-row"><div class="skill-file">offtake_agreements</div><div class="skill-desc">Pricing formula, provisional/final invoice, umpire sample, grade dispute, Bill of Lading</div></div>
+        <div class="skill-row"><div class="skill-file">mineral_export_logistics</div><div class="skill-desc">Vessel nomination, laytime/demurrage, loading plan, B/L management, documentary collection</div></div>
+        <div class="skill-row"><div class="skill-file">legal_disputes</div><div class="skill-desc">Regulatory prosecution response, contractor claim defence, Industrial Court, settlement matrix</div></div>
+      </div>
+
+      <!-- GOVERNANCE -->
+      <div class="skill-group">
+        <div class="skill-group-header gov">
+          <div class="skill-group-icon">🏛️</div>
+          <div class="skill-group-title">Governance</div>
+          <div class="skill-group-count">2 modules</div>
+        </div>
+        <div class="skill-row"><div class="skill-file">corporate_governance</div><div class="skill-desc">Board resolutions, SSM annual return, AGM, MACC Act s.17A anti-bribery, T.R.U.S.T. framework</div></div>
+        <div class="skill-row"><div class="skill-file">it_data_security</div><div class="skill-desc">PDPA 2010 compliance, 3-2-1 backup, access control, BEC prevention, breach response</div></div>
+      </div>
+
+    </div><!-- /skills-grid -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  REGULATORY COVERAGE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Regulatory Coverage</div>
+  <h2 class="section-title">Every Malaysian mining<br><em>authority. Every obligation.</em></h2>
+  <p class="section-body">
+    KROS covers the full regulatory landscape faced by Malaysian mining companies — from federal legislation
+    to state enactments, from JMG technical approvals to DOSH safety inspections.
+  </p>
+
+  <div class="reg-bands">
+    <div class="reg-band">
+      <div class="reg-authority"><div class="reg-authority-name">JMG</div><div class="reg-authority-full">Jabatan Mineral & Geosains</div></div>
+      <div class="reg-items">
+        <span class="reg-tag">Annual Mine Plan approval</span>
+        <span class="reg-tag">Monthly Production Return PR-1</span>
+        <span class="reg-tag">Annual Technical Report</span>
+        <span class="reg-tag">Reserve statement</span>
+        <span class="reg-tag">Slope stability reports</span>
+        <span class="reg-tag">Mining Lease renewal</span>
+        <span class="reg-tag">Stop-Work response</span>
+      </div>
+    </div>
+    <div class="reg-band">
+      <div class="reg-authority"><div class="reg-authority-name">DOE</div><div class="reg-authority-full">Dept of Environment</div></div>
+      <div class="reg-items">
+        <span class="reg-tag">EIA approval conditions</span>
+        <span class="reg-tag">Monthly monitoring reports</span>
+        <span class="reg-tag">Annual Environmental Audit</span>
+        <span class="reg-tag">Scheduled waste compliance</span>
+        <span class="reg-tag">Self-reporting protocol</span>
+        <span class="reg-tag">Effluent Standard A/B</span>
+        <span class="reg-tag">PM10 boundary limits</span>
+      </div>
+    </div>
+    <div class="reg-band">
+      <div class="reg-authority"><div class="reg-authority-name">DOSH</div><div class="reg-authority-full">Dept of Safety & Health</div></div>
+      <div class="reg-items">
+        <span class="reg-tag">OSHA 1994 obligations</span>
+        <span class="reg-tag">JKKP 8 accident reports</span>
+        <span class="reg-tag">HIRARC requirements</span>
+        <span class="reg-tag">SHO registration</span>
+        <span class="reg-tag">USECHH chemicals</span>
+        <span class="reg-tag">Machinery inspection</span>
+        <span class="reg-tag">Safety committee</span>
+      </div>
+    </div>
+    <div class="reg-band">
+      <div class="reg-authority"><div class="reg-authority-name">JKPK</div><div class="reg-authority-full">Explosive Controls</div></div>
+      <div class="reg-items">
+        <span class="reg-tag">Shot Firer licence</span>
+        <span class="reg-tag">Explosive store licence</span>
+        <span class="reg-tag">Misfire reporting</span>
+        <span class="reg-tag">Magazine records</span>
+      </div>
+    </div>
+    <div class="reg-band">
+      <div class="reg-authority"><div class="reg-authority-name">JTKSM</div><div class="reg-authority-full">Labour Department</div></div>
+      <div class="reg-items">
+        <span class="reg-tag">Employment Act 1955</span>
+        <span class="reg-tag">Overtime limits (104 hrs)</span>
+        <span class="reg-tag">Retrenchment notification</span>
+        <span class="reg-tag">Foreign worker levy</span>
+        <span class="reg-tag">Industrial Court</span>
+        <span class="reg-tag">Labour Court claims</span>
+      </div>
+    </div>
+    <div class="reg-band">
+      <div class="reg-authority"><div class="reg-authority-name">KWSP / PERKESO</div><div class="reg-authority-full">EPF / SOCSO / EIS</div></div>
+      <div class="reg-items">
+        <span class="reg-tag">EPF 11%/13% rates</span>
+        <span class="reg-tag">SOCSO 0.5%/1.75%</span>
+        <span class="reg-tag">EIS 0.2%/0.2%</span>
+        <span class="reg-tag">PCB monthly deduction</span>
+        <span class="reg-tag">FWCS RM 72/year</span>
+        <span class="reg-tag">EIS retrenchment claim</span>
+      </div>
+    </div>
+    <div class="reg-band">
+      <div class="reg-authority"><div class="reg-authority-name">Customs / MITI</div><div class="reg-authority-full">Export Controls</div></div>
+      <div class="reg-items">
+        <span class="reg-tag">Export Duty rates</span>
+        <span class="reg-tag">Customs Form K3</span>
+        <span class="reg-tag">HS code classification</span>
+        <span class="reg-tag">Certificate of Origin</span>
+        <span class="reg-tag">Mineral Export Permit</span>
+        <span class="reg-tag">ASEAN-China FTA Form D</span>
+      </div>
+    </div>
+    <div class="reg-band">
+      <div class="reg-authority"><div class="reg-authority-name">SSM / MACC</div><div class="reg-authority-full">Corporate & Integrity</div></div>
+      <div class="reg-items">
+        <span class="reg-tag">Companies Act 2016</span>
+        <span class="reg-tag">Annual return filing</span>
+        <span class="reg-tag">Board resolutions</span>
+        <span class="reg-tag">MACC Act s.17A</span>
+        <span class="reg-tag">T.R.U.S.T. framework</span>
+        <span class="reg-tag">PDPA 2010</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  HOW IT WORKS                                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Query Pipeline</div>
+  <h2 class="section-title">From question to answer<br><em>in under four seconds.</em></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Query received</div>
+      <div class="step-body">User types in plain English or Bahasa Malaysia. Any device, any browser.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Claude Triage</div>
+      <div class="step-body">Claude Haiku classifies: emergency? Project? Sensitive data? Use DeepSeek?</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Skills Retrieved</div>
+      <div class="step-body">pgvector finds the top 5 relevant Skills.md chunks via semantic similarity search.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">DeepSeek Reasons</div>
+      <div class="step-body">DeepSeek V3/R1 reasons over Skills.md content, calculates, or drafts the answer.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-title">Claude Delivers</div>
+      <div class="step-body">Claude formats, humanises, and delivers the final response in the department voice.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  COST                                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="cost-section">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="section-label" style="color:rgba(184,146,42,0.8);">Cost Analysis</div>
+    <h2 class="section-title" style="color:var(--paper);">Enterprise AI intelligence<br><em>at fraction of the cost.</em></h2>
+    <p style="color:rgba(245,242,236,0.55);font-size:15px;max-width:620px;line-height:1.8;">
+      By routing heavy reasoning tasks to DeepSeek V3 (USD 0.27/M input tokens) and reserving Claude for
+      interface and safety, KROS delivers the same quality at 85% lower cost than an all-Claude Opus deployment.
+    </p>
+
+    <table class="cost-table">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>All Claude Opus</th>
+          <th>KROS (Claude + DeepSeek)</th>
+          <th>Annual Saving</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>50 queries/day</td>
+          <td class="label">~USD 285/month</td>
+          <td class="highlight">~USD 20–30/month</td>
+          <td class="saving">~USD 3,000/year</td>
+        </tr>
+        <tr>
+          <td>150 queries/day</td>
+          <td class="label">~USD 850/month</td>
+          <td class="highlight">~USD 55–80/month</td>
+          <td class="saving">~USD 9,000/year</td>
+        </tr>
+        <tr>
+          <td>300 queries/day</td>
+          <td class="label">~USD 1,700/month</td>
+          <td class="highlight">~USD 110–150/month</td>
+          <td class="saving">~USD 19,000/year</td>
+        </tr>
+        <tr>
+          <td>500 queries/day</td>
+          <td class="label">~USD 2,800/month</td>
+          <td class="highlight">~USD 180–240/month</td>
+          <td class="saving">~USD 31,000/year</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:40px;max-width:800px;">
+      <div style="padding:20px;border:1px solid rgba(184,146,42,0.2);border-radius:6px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;">CLAUDE HAIKU TRIAGE</div>
+        <div style="font-family:var(--mono);font-size:18px;color:var(--paper);margin-bottom:4px;">~$0.0001</div>
+        <div style="font-size:11px;color:rgba(245,242,236,0.4);">per query classification</div>
+      </div>
+      <div style="padding:20px;border:1px solid rgba(245,158,11,0.2);border-radius:6px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--gold2);letter-spacing:2px;margin-bottom:8px;">DEEPSEEK V3 REASONING</div>
+        <div style="font-family:var(--mono);font-size:18px;color:var(--paper);margin-bottom:4px;">$0.27/M tokens</div>
+        <div style="font-size:11px;color:rgba(245,242,236,0.4);">vs Claude Opus $15/M tokens</div>
+      </div>
+      <div style="padding:20px;border:1px solid rgba(192,132,252,0.2);border-radius:6px;">
+        <div style="font-family:var(--mono);font-size:10px;color:#C084FC;letter-spacing:2px;margin-bottom:8px;">CLAUDE SONNET DELIVERY</div>
+        <div style="font-family:var(--mono);font-size:18px;color:var(--paper);margin-bottom:4px;">$3/M tokens</div>
+        <div style="font-size:11px;color:rgba(245,242,236,0.4);">formatting, safety, delivery</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  TECH STACK                                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Technical Specifications</div>
+  <h2 class="section-title">Production-ready.<br><em>Deploy in one command.</em></h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px;">
+    <div>
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;color:var(--gold);">Core Stack</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Interface AI</span>
+          <span>Claude Sonnet 4 (claude-sonnet-4-5)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Triage AI</span>
+          <span>Claude Haiku 4.5 (fast, cheap)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Reasoning AI</span>
+          <span>DeepSeek V3 + R1 (OpenAI-compatible)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Vector DB</span>
+          <span>PostgreSQL 16 + pgvector (cosine similarity)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Backend</span>
+          <span>Node.js 22, Express.js, ESM</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Frontend</span>
+          <span>Vanilla HTML/CSS/JS — no framework required</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Containerisation</span>
+          <span>Docker + Docker Compose (pgvector image)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Data Residency</span>
+          <span>Azure-hosted DeepSeek for Malaysian data sovereignty</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;color:var(--gold);">Key Features</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Streaming</span>
+          <span>SSE streaming via /api/chat/stream — tokens appear instantly</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Memory</span>
+          <span>Conversation history stored per session in PostgreSQL</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Live Data</span>
+          <span>DB integration: licence expiry, cert alerts, contractor KPIs</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Cost Tracking</span>
+          <span>Per-query cost logged; 30-day dashboard at /api/stats</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Knowledge Gap</span>
+          <span>DeepSeek flags [KNOWLEDGE GAP] when Skills.md is insufficient</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Skills Update</span>
+          <span>Drop new .md file into /skills-library → re-seed in 5 minutes</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Language</span>
+          <span>English and Bahasa Malaysia — system detects and responds in kind</span>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;">Quick Start</span>
+          <span>npm install + docker-compose up + seed-skills → live in 15 minutes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API -->
+  <div style="margin-top:48px;background:var(--ink);border-radius:10px;padding:28px 32px;">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:16px;">REST API</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div style="font-family:var(--mono);font-size:11.5px;color:rgba(245,242,236,0.7);line-height:2;">
+        <span style="color:#60A5FA;">POST</span> /api/chat → Main query endpoint<br>
+        <span style="color:#60A5FA;">POST</span> /api/chat/stream → SSE streaming<br>
+        <span style="color:#4ADE80;">GET</span>  /api/projects → 5 department list<br>
+        <span style="color:#4ADE80;">GET</span>  /api/stats → 30-day cost dashboard<br>
+        <span style="color:#4ADE80;">GET</span>  /api/health → System status<br>
+        <span style="color:#F59E0B;">POST</span> /api/setup → DB initialisation
+      </div>
+      <div style="font-size:12px;color:rgba(245,242,236,0.45);line-height:2;">
+        Returns: response, project, emergency flag<br>
+        Returns: SSE token stream<br>
+        Returns: icons, descriptions, colours<br>
+        Returns: queries, cost, knowledge gaps<br>
+        Returns: status, company name, timestamp<br>
+        Returns: tables created confirmation
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  BACK COVER                                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="back-cover">
+  <div class="back-quote">
+    When your Mine Manager leaves, your mine doesn't have to stop knowing what they knew.
+  </div>
+  <div class="back-attr">KROS — Knowledge Retention & Operations System</div>
+
+  <div style="display:flex;gap:40px;margin-bottom:60px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;">
+      <div style="font-family:var(--serif);font-size:40px;color:var(--gold2);font-style:italic;">53</div>
+      <div style="font-family:var(--mono);font-size:9px;color:rgba(245,242,236,0.35);letter-spacing:2px;text-transform:uppercase;">Skills Modules</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:var(--serif);font-size:40px;color:var(--gold2);font-style:italic;">5</div>
+      <div style="font-family:var(--mono);font-size:9px;color:rgba(245,242,236,0.35);letter-spacing:2px;text-transform:uppercase;">AI Projects</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:var(--serif);font-size:40px;color:var(--gold2);font-style:italic;">85%</div>
+      <div style="font-family:var(--mono);font-size:9px;color:rgba(245,242,236,0.35);letter-spacing:2px;text-transform:uppercase;">Cost Reduction</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:var(--serif);font-size:40px;color:var(--gold2);font-style:italic;">&lt;4s</div>
+      <div style="font-family:var(--mono);font-size:9px;color:rgba(245,242,236,0.35);letter-spacing:2px;text-transform:uppercase;">Response Time</div>
+    </div>
+  </div>
+
+  <div class="back-tagline">KROS · Keeping What You Know · Malaysian Mining Edition</div>
+</div>
+
+</body>
+</html>
